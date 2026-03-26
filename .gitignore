@@ -1,4 +1,4 @@
-/Backend/.env
-.idea/
+Backend/.env
+Frontend/.idea/
 .vscode/
 .venv/
