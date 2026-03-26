@@ -40,7 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -53,85 +52,60 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.a3d_agrobot_app.R
-import com.example.a3d_agrobot_app.ui.theme._3D_AGROBOT_APPTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
+import com.example.a3d_agrobot_app.R
 
-class MainActivity : ComponentActivity() {
+
+class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) {
-                AppNavigation()
+                HomePageApp()
             }
         }
     }
 }
 
 @Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
+fun HomePageApp(onLogout: () -> Unit = {}) {
     val context = LocalContext.current
-
-    var startDestination by remember { mutableStateOf<String>("Welcome") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        val token = withContext(Dispatchers.IO) {
-            TokenStore.getToken(context)
-        }
-        if (token != null) {
-            startDestination = "Home"
-        } else startDestination = "Welcome"
+        firstName = withContext(Dispatchers.IO) { TokenStore.getFirstName(context) ?: "" }
+        lastName = withContext(Dispatchers.IO) { TokenStore.getLastName(context) ?: "" }
     }
-
-
-        NavHost(
-            navController = navController,
-            startDestination = startDestination
-        ) {
-            composable("Welcome") {
-                WelcomePageApp(
-                    onLoginClick = { navController.navigate("Login") },
-                    onSignupClick = { navController.navigate("Signup")}
-                )
-            }
-            composable("Login") {
-                LoginPageApp (
-                    onSuccess = {
-                        navController.navigate("Home") {
-                            popUpTo("Welcome") { inclusive = true }
-                        }
-                    }
-                )
-
-            }
-            composable("Signup") {
-                SignupPageApp(
-                    onSuccess = {
-                    navController.navigate("Home") {
-                        popUpTo("Welcome") { inclusive = true }
-                    }
-                }
-                )
-            }
-            composable("Home") {
-                HomePageApp(
-                    onLogout = {
-                    navController.navigate("Home") {
-                        popUpTo("Welcome") { inclusive = true }
-                    }
-                }
-                )
-            }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0D2D1A)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Добре дошъл,",
+                fontSize = 18.sp,
+                color = Color(0xFF639922)
+            )
+            Text(
+                text = "$firstName $lastName",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFEAF3DE)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Вашата градина ви чака",
+                fontSize = 14.sp,
+                color = Color(0xFF639922)
+            )
         }
     }
+}
