@@ -80,6 +80,8 @@ fun LoginPageApp(onSuccess: () -> Unit = {}) {
     var statusMessage by rememberSaveable { mutableStateOf("") }
     var isError by rememberSaveable { mutableStateOf(false) }
 
+    val isFormFilled = email.isNotBlank() && password.isNotBlank()
+
     val icon = if (passwordVisibility)
         painterResource(id = R.drawable.visibility_icon)
     else
@@ -215,9 +217,11 @@ fun LoginPageApp(onSuccess: () -> Unit = {}) {
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
                     }
+                    val isFormFilled = email.isNotBlank() && password.isNotBlank()
                     Button(
                         onClick = {
                             CoroutineScope(Dispatchers.IO).launch {
+
                                 try {
                                     val response = LoginData().register(
                                         email, password
@@ -244,16 +248,19 @@ fun LoginPageApp(onSuccess: () -> Unit = {}) {
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
-                                        statusMessage = "Грешка: ${e.message}"
+                                        statusMessage = "Грешка: Опитайте отноео"
                                         isError = true
                                     }
                                 }
 
                             }
                         },
+                        enabled = isFormFilled,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF3B6D11),
-                            contentColor = Color(0xFFEAF3DE)
+                            contentColor = Color(0xFFEAF3DE),
+                            disabledContainerColor = Color(0xFF3B6D11).copy(alpha = 0.5f),
+                            disabledContentColor = Color(0xFFEAF3DE).copy(alpha = 0.5f)
                         ),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
