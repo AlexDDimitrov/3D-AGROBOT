@@ -143,6 +143,8 @@ fun LoginPageApp() {
                 color = Color(0xFF639922),
                 modifier = Modifier.padding(bottom = 32.dp)
             )
+            val context = androidx.compose.ui.platform.LocalContext.current
+
             Box(
                 modifier = Modifier
                     .widthIn(max = 480.dp)
@@ -225,6 +227,10 @@ fun LoginPageApp() {
 
                                     val result = JSONObject(response).getInt("result")
 
+                                    if(result == 0) {
+                                        val token = JSONObject(response).getString("token")
+                                        TokenStore.saveToken(context, token)
+                                    }
 
                                     withContext(Dispatchers.Main) {
                                         statusMessage = when (result) {
