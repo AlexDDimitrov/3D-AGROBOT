@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -33,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -82,30 +85,104 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
         firstName = withContext(Dispatchers.IO) { TokenStore.getFirstName(context) ?: "" }
         lastName = withContext(Dispatchers.IO) { TokenStore.getLastName(context) ?: "" }
     }
-    Box(
+
+    var selectedTab by remember { mutableIntStateOf(0) }
+
+    Scaffold (
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D2D1A)),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "Добре дошъл,",
-                fontSize = 18.sp,
-                color = Color(0xFF639922)
-            )
-            Text(
-                text = "$firstName $lastName",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFEAF3DE)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Вашата градина ви чака",
-                fontSize = 14.sp,
-                color = Color(0xFF639922)
+            .background(Color(0xFFF4FAE8)),
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 15.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Добре дошли, $firstName",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF27500A)
+                )
+                IconButton(onClick = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        TokenStore.clearToken(context)
+                        withContext(Dispatchers.Main) { onLogout() }
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.logout),
+                        contentDescription = "Logout",
+                        tint = Color(0xFF27500A)
+                    )
+                }
+            }
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it }
             )
         }
+    ) { values ->
+        Box(modifier = Modifier.padding(values)) {
+            when (selectedTab) {
+         //       0 -> GardenPageApp()
+        //        1 -> RobotConnectPageApp()
+      //          2 -> CheckHealthPageApp()
+            }
+        }
+    }
+}
+
+@Composable
+fun BottomNavigationBar(
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .height(70.dp)
+            .background(Color(0xFFEAF3DE))
+            .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        NavIconItem(
+            iconId = R.drawable.wheat_icon,
+            isSelected = selectedTab == 0,
+            onClick = {onTabSelected(0)}
+        )
+        NavIconItem(
+            iconId = R.drawable.robot,
+            isSelected = selectedTab == 1,
+            onClick = {onTabSelected(1)}
+        )
+        NavIconItem(
+            iconId = R.drawable.health_icon,
+            isSelected = selectedTab == 2,
+            onClick = {onTabSelected(2)}
+        )
+    }
+}
+
+@Composable
+fun NavIconItem(iconId: Int, isSelected: Boolean, onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isSelected) Color(0xFF3B6D11) else Color.Transparent)
+    ) {
+        Icon(
+            painter = painterResource(id = iconId),
+            contentDescription = null,
+            tint = if (isSelected) Color.White else Color(0xFF639922)
+        )
     }
 }

@@ -127,7 +127,7 @@ fun AppNavigation() {
             composable("Home") {
                 HomePageApp(
                     onLogout = {
-                    navController.navigate("Home") {
+                    navController.navigate("Welcome") {
                         popUpTo("Welcome") { inclusive = true }
                     }
                 }
