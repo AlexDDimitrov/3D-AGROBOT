@@ -15,6 +15,7 @@ class SignupData {
         val url = URL("http://10.196.140.20:5000/auth/register")
         val conn = url.openConnection() as HttpURLConnection
 
+
         conn.requestMethod = "POST"
         conn.setRequestProperty("Content-Type", "application/json")
         conn.doOutput = true
