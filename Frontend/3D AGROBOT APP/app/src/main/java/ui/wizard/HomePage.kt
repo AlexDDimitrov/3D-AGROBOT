@@ -80,6 +80,8 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
     val context = LocalContext.current
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var gardenScreen by remember { mutableStateOf("list") }
+    var selectedGarden by remember { mutableStateOf<GardenData?>(null) }
 
     LaunchedEffect(Unit) {
         firstName = withContext(Dispatchers.IO) { TokenStore.getFirstName(context) ?: "" }
@@ -102,7 +104,7 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Добре дошли, $firstName",
+                    text = "Добре дошли, $firstName $lastName",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF27500A)
@@ -130,7 +132,26 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
     ) { values ->
         Box(modifier = Modifier.padding(values)) {
             when (selectedTab) {
-         //       0 -> GardenPageApp()
+                0 -> when (gardenScreen) {
+                    "list" -> GardenPageApp(
+                        onAddClick  = { gardenScreen = "create" },
+                        onEditClick = { garden ->
+                            selectedGarden = garden
+                            gardenScreen = "edit"
+                        }
+                    )
+                    "create" -> CreateGardenPageApp(
+                        onSuccess = { gardenScreen = "list" },
+                        onBack    = { gardenScreen = "list" }
+                    )
+                    "edit" -> selectedGarden?.let { garden ->
+                        EditGardenPageApp(
+                            garden    = garden,
+                            onSuccess = { gardenScreen = "list" },
+                            onBack    = { gardenScreen = "list" }
+                        )
+                    }
+                }
         //        1 -> RobotConnectPageApp()
       //          2 -> CheckHealthPageApp()
             }
