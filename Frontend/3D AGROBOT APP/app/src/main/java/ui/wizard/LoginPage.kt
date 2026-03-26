@@ -58,19 +58,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import com.example.a3d_agrobot_app.R
 
-
-class LoginPage : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-           Scaffold(modifier = Modifier.fillMaxSize()) {
-               LoginPageApp()
-           }
-        }
-    }
-}
-
 @Composable
 fun LoginPageApp(onSuccess: () -> Unit = {}) {
     var email by remember { mutableStateOf(String()) }
@@ -80,7 +67,7 @@ fun LoginPageApp(onSuccess: () -> Unit = {}) {
     var statusMessage by rememberSaveable { mutableStateOf("") }
     var isError by rememberSaveable { mutableStateOf(false) }
 
-    val isFormFilled = email.isNotBlank() && password.isNotBlank()
+    val isFormFilled = email.isNotBlank() && password.isNotBlank() && password.length >= 6
 
     val icon = if (passwordVisibility)
         painterResource(id = R.drawable.visibility_icon)
@@ -184,7 +171,7 @@ fun LoginPageApp(onSuccess: () -> Unit = {}) {
                         onValueChange = { newPassword ->
                             password = newPassword
                         },
-                        placeholder = { Text(text = "Парола") },
+                        placeholder = { Text(text = "Парола(6 цифри)") },
                         trailingIcon = {
                             IconButton(onClick = {
                                 passwordVisibility = !passwordVisibility
@@ -217,7 +204,6 @@ fun LoginPageApp(onSuccess: () -> Unit = {}) {
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
                     }
-                    val isFormFilled = email.isNotBlank() && password.isNotBlank()
                     Button(
                         onClick = {
                             CoroutineScope(Dispatchers.IO).launch {

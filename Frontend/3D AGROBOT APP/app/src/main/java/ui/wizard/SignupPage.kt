@@ -61,18 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-class SignupPage : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            _3D_AGROBOT_APPTheme {
-                SignupPageApp()
-            }
-        }
 
-    }
-}
 
 @Composable
 fun SignupPageApp(onSuccess: () -> Unit = {}) {
@@ -259,7 +248,7 @@ fun SignupPageApp(onSuccess: () -> Unit = {}) {
                         )
                     }
                     val isFormFilled = first_name.isNotBlank() && last_name.isNotBlank() &&
-                    email.isNotBlank() && password.isNotBlank()
+                    email.isNotBlank() && password.isNotBlank() && password.length >= 6
 
                     Button(
                         onClick = {
