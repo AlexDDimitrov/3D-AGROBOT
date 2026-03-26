@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "3D_AGROBOT_APP"
 include(":app")
- 
