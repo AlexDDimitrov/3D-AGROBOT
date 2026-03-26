@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -106,6 +107,23 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
                 fontSize = 14.sp,
                 color = Color(0xFF639922)
             )
+            OutlinedButton(
+                onClick = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        TokenStore.clearToken(context)
+                        withContext(Dispatchers.Main) {
+                            onLogout()
+                        }
+                    }
+                },
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFEAF3DE)),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .widthIn(min = 200.dp)
+                    .height(50.dp)
+            ) {
+                Text("Изход от акаунта")
+            }
         }
     }
 }

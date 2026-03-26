@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a3d_agrobot_app.R
@@ -93,8 +94,15 @@ fun WelcomePageApp(
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFEAF3DE)
             )
-
-
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "За по-здрава реколта с по-малко усилия",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Center,
+                color = Color(0xFFEAF3DE)
+            )
+            Spacer(modifier = Modifier.height(15.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(
                     onClick = onLoginClick,
@@ -105,7 +113,7 @@ fun WelcomePageApp(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth().height(52.dp)
                 ) {
-                    Text("Влезте в акаунта си", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                    Text("Влезте в профила си", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -117,7 +125,7 @@ fun WelcomePageApp(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth().height(52.dp)
                 ) {
-                    Text("Създайте акаунт", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                    Text("Създайте профил", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 }
             }
         }
