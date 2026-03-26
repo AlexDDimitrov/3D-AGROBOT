@@ -3,4 +3,3 @@ mysql-connector-python
 bcrypt
 python-dotenv
 PyJWT
-gunicorn
