@@ -1,4 +1,4 @@
-package com.example.a3d_agrobot_app
+package ui.wizard
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
