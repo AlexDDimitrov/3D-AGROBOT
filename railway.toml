@@ -1,6 +1,5 @@
 [build]
-rootDirectory = "Backend"
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "gunicorn run:app"
+startCommand = "cd Backend && gunicorn run:app"
