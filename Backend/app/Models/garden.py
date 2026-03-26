@@ -18,6 +18,23 @@ class GardenModel:
         conn.close()
 
     @staticmethod
+    def update(garden_id: int, user_id: int, fields: dict):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        set_clause = ", ".join([f"{key} = %s" for key in fields.keys()])
+        values = list(fields.values()) + [garden_id, user_id]
+
+        cursor.execute(
+            f"UPDATE gardens SET {set_clause} WHERE id = %s AND user_id = %s",
+            values
+        )
+        affected = cursor.rowcount
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return affected
+
     @staticmethod
     def get_by_user_id(user_id: int):
         conn = get_connection()

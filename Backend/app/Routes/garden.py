@@ -33,3 +33,24 @@ def create_garden():
 
     logging.info(f"Create garden - user_id: {user_id} - {garden_name}")
     return jsonify({"result": 0}), 201
+
+@garden_bp.put("/edit/<int:garden_id>")
+@login_required
+def edit_garden(garden_id):
+    data = request.get_json()
+    user_id = request.user_id
+    
+    allowed = {"garden_name", "garden_width", "garden_height", "path_width", "number_beds", "plant"}
+    
+    fields = {k: v for k, v in data.items() if k in allowed}
+
+    if not fields:
+        return jsonify({"result": 202}), 400
+
+    affected = GardenModel.update(garden_id, user_id, fields)
+
+    if affected == 0:
+        return jsonify({"result": 203}), 404
+
+    logging.info(f"Edit garden - user_id: {user_id} - garden_id: {garden_id}")
+    return jsonify({"result": 0}), 200
