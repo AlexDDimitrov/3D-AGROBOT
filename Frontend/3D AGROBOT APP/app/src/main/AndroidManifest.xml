@@ -12,9 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme._3D_AGROBOT_APP">
         <activity
-            android:name=".MainActivity"
+            android:name="ui.wizard.SignupPage"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="3D AGROBOT APP"
             android:theme="@style/Theme._3D_AGROBOT_APP">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
