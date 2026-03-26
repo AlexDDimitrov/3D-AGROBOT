@@ -1,6 +1,7 @@
 import logging
 from flask import Blueprint, request, jsonify
 from ..services.auth_service import register_user, login_user
+from ..utils.jwt_helper import generate_token
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -28,9 +29,11 @@ def login():
     result, user = login_user(email, password)
 
     if result == 0:
+        token = generate_token(user["id"])
         logging.info(f"Login success: {email}")
         return jsonify({
             "result": 0,
+            "token": token,
             "user": {
                 "id": user["id"],
                 "first_name": user["first_name"],
