@@ -1,0 +1,5 @@
+[build]
+rootDirectory = "Backend"
+
+[deploy]
+startCommand = "gunicorn run:app"
