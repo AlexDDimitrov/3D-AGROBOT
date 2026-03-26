@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,15 +51,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.a3d_agrobot_app.R
-import com.example.a3d_agrobot_app.ui.theme._3D_AGROBOT_APPTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
+import com.example.a3d_agrobot_app.R
+
 
 class LoginPage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,14 +72,14 @@ class LoginPage : ComponentActivity() {
 }
 
 @Composable
-fun LoginPageApp() {
+fun LoginPageApp(onSuccess: () -> Unit = {}) {
     var email by remember { mutableStateOf(String()) }
     var isValid by remember { mutableStateOf(true) }
     var password by remember { mutableStateOf(String()) }
     var passwordVisibility by remember { mutableStateOf(false) }
     var statusMessage by rememberSaveable { mutableStateOf("") }
     var isError by rememberSaveable { mutableStateOf(false) }
-
+    val context = LocalContext.current
 
     val icon = if (passwordVisibility)
         painterResource(id = R.drawable.visibility_icon)
@@ -226,12 +225,6 @@ fun LoginPageApp() {
                                     )
 
                                     val result = JSONObject(response).getInt("result")
-
-                                    if(result == 0) {
-                                        val token = JSONObject(response).getString("token")
-                                        TokenStore.saveToken(context, token)
-                                    }
-
                                     withContext(Dispatchers.Main) {
                                         statusMessage = when (result) {
                                             0 -> "Успешен вход"
@@ -239,6 +232,16 @@ fun LoginPageApp() {
                                             else -> "Неизвестна грешка: $result"
                                         }
                                         isError = result != 0
+                                    }
+
+                                    if (result == 0) {
+                                        val json = JSONObject(response)
+                                        val token = json.getString("token")
+                                        val user = json.getJSONObject("user")
+                                        val firstName = user.getString("first_name")
+                                        val lastName = user.getString("last_name")
+                                        TokenStore.saveToken(context, token, firstName, lastName)
+                                        withContext(Dispatchers.Main) { onSuccess() }
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {

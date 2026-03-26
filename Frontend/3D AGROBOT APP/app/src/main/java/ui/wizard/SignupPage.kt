@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -74,7 +75,7 @@ class SignupPage : ComponentActivity() {
 }
 
 @Composable
-fun SignupPageApp() {
+fun SignupPageApp(onSuccess: () -> Unit = {}) {
     var first_name by rememberSaveable { mutableStateOf(String()) }
     var last_name by rememberSaveable { mutableStateOf(String()) }
     var email by rememberSaveable { mutableStateOf(String()) }
@@ -83,6 +84,8 @@ fun SignupPageApp() {
     var passwordVisibility by rememberSaveable { mutableStateOf(false) }
     var statusMessage by rememberSaveable { mutableStateOf("") }
     var isError by rememberSaveable { mutableStateOf(false) }
+
+    val context = LocalContext.current
 
     val icon = if (passwordVisibility)
         painterResource(id = R.drawable.visibility_icon)
@@ -277,6 +280,18 @@ fun SignupPageApp() {
                                         }
                                         isError = result != 0
                                     }
+
+                                    if (result == 0) {
+                                        val json = JSONObject(response)
+                                        val token = json.getString("token")
+                                        val user = json.getJSONObject("user")
+                                        val firstName = user.getString("first_name")
+                                        val lastName = user.getString("last_name")
+                                        TokenStore.saveToken(context, token, firstName, lastName)
+                                        withContext(Dispatchers.Main) { onSuccess() }
+                                    }
+
+
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
                                         statusMessage = "Грешка: ${e.message}"
