@@ -9,9 +9,9 @@ def create_app():
     app.config.from_object(Config)
 
     from .routes.auth import auth_bp
-    from .routes.garden import garden_bp  # 👈 ново
-
+    from .routes.garden import garden_bp
+    
     app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(garden_bp, url_prefix="/garden")  # 👈 ново
+    app.register_blueprint(garden_bp, url_prefix="/garden")
 
     return app
