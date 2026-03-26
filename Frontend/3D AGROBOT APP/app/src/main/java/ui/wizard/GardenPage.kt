@@ -21,29 +21,42 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import  androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.example.a3d_agrobot_app.R
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class GardenData(
     val id: Int = 0,
-    val name: String = "Градина"
+    val garden_name: String = "",
+    val garden_width: Int = 0,
+    val garden_height: Int = 0,
+    val path_width: Int = 0,
+    val number_beds: Int = 0,
+    val plant: String = ""
 )
-
 
 @Composable
 fun GardenPageApp(
@@ -51,11 +64,22 @@ fun GardenPageApp(
     onAddClick: () -> Unit,
     onEditClick: (Int) -> Unit
 ) {
+    val context = LocalContext.current
+    val scope   = rememberCoroutineScope()
+
+    var gardens by remember { mutableStateOf<List<GardenData>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        val token = withContext(Dispatchers.IO) { TokenStore.getToken(context) } ?: return@LaunchedEffect
+        gardens = withContext(Dispatchers.IO) {  }
+        loading = false
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .statusBarsPadding(),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
         Button(
@@ -73,28 +97,35 @@ fun GardenPageApp(
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
-            if (gardens.isEmpty()) {
+        when {
+            loading ->
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center)
+                {
+                CircularProgressIndicator(color = Color(0xFF3B6D11))
+            }
+            gardens.isEmpty() ->
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center)
+                {
                     Text(
-                        text = "Няма добавени градини",
+                        "Няма добавени градини",
                         color = Color(0xFF639922).copy(alpha = 0.6f),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center
                     )
                 }
-            } else {
-                LazyColumn {
-                    itemsIndexed(gardens) { index, garden ->
-                        GardenListItem(
-                            displayIndex = index + 1,
-                            gardenName = "Градина",
-                            onEditClick = { onEditClick(index) }
-                        )
+            else -> LazyColumn {
+                itemsIndexed(gardens) { index, garden ->
+                    GardenListItem(
+                        displayIndex = index + 1,
+                        gardenName   = garden.garden_name,
+                        onEditClick  = { onEditClick(garden) }
+                    )
+
                 }
-            }
         }
     }
 }
@@ -106,7 +137,7 @@ fun GardenListItem(displayIndex: Int, gardenName: String, onEditClick: () -> Uni
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
+            .background(Color(0xCCF4FAE8))
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -120,8 +151,8 @@ fun GardenListItem(displayIndex: Int, gardenName: String, onEditClick: () -> Uni
         IconButton(onClick = onEditClick) {
             Icon(
                 painter = painterResource(id = R.drawable.edit_icon),
-                contentDescription = "Редактиране",
-                tint = Color(0xFF639922)
+                contentDescription = "Edit",
+                tint = Color(0xFF3B6D11)
             )
         }
     }
