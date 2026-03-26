@@ -2,9 +2,9 @@ import logging
 from flask import Blueprint, request, jsonify
 from ..services.auth_service import register_user, login_user
 from ..utils.jwt_helper import generate_token
+from ..models.user import UserModel
 
 auth_bp = Blueprint("auth", __name__)
-
 @auth_bp.post("/register")
 def register():
     data = request.get_json()
@@ -16,8 +16,23 @@ def register():
 
     result = register_user(first_name, last_name, email, password)
 
-    logging.info(f"Register result: {result} - {email}")
-    return jsonify({"result": result}), 201 if result == 0 else 400
+    if result == 0:
+        user = UserModel.find_by_email(email)
+        token = generate_token(user["id"])
+        logging.info(f"Register success: {email}")
+        return jsonify({
+            "result": 0,
+            "token": token,
+            "user": {
+                "id": user["id"],
+                "first_name": user["first_name"],
+                "last_name": user["last_name"],
+                "email": user["email"]
+            }
+        }), 201
+
+    logging.warning(f"Register result: {result} - {email}")
+    return jsonify({"result": result}), 400
 
 @auth_bp.post("/login")
 def login():
