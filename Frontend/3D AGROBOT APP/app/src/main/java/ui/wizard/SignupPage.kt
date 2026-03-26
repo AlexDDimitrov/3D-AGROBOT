@@ -56,7 +56,7 @@ class SignupPage : ComponentActivity() {
 @Composable
 fun SignupPageApp() {
     var first_name by remember { mutableStateOf(String()) }
-    var second_name by remember { mutableStateOf(String()) }
+    var last_name by remember { mutableStateOf(String()) }
     var email by remember { mutableStateOf(String()) }
     var isValid by remember { mutableStateOf(true) }
     var password by remember { mutableStateOf(String()) }
@@ -73,10 +73,10 @@ fun SignupPageApp() {
     )
     Spacer(modifier = Modifier.height(20.dp))
     OutlinedTextField(
-        value = second_name,
+        value = last_name,
         label = { Text("Фамилия")},
         placeholder = { Text("Въведете фамилията си")},
-        onValueChange = {new_name -> second_name = new_name },
+        onValueChange = {new_name -> last_name = new_name },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text
         )
