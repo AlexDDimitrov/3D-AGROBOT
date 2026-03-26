@@ -83,16 +83,17 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
 
-    var startDestination by remember {mutableStateOf<String>("")}
+    var startDestination by remember { mutableStateOf<String>("Welcome") }
 
     LaunchedEffect(Unit) {
         val token = withContext(Dispatchers.IO) {
             TokenStore.getToken(context)
         }
-        if (token!=null) {
+        if (token != null) {
             startDestination = "Home"
-        }
-        else startDestination = "Welcome"
+        } else startDestination = "Welcome"
+    }
+
 
         NavHost(
             navController = navController,
@@ -134,4 +135,3 @@ fun AppNavigation() {
             }
         }
     }
-}

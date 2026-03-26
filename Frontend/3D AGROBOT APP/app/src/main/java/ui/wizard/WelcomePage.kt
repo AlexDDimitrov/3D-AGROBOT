@@ -42,7 +42,10 @@ class WelcomePage : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) {
-                WelcomePageApp()
+                WelcomePageApp(
+                    onLoginClick = { },
+                    onSignupClick = { }
+                )
             }
         }
     }

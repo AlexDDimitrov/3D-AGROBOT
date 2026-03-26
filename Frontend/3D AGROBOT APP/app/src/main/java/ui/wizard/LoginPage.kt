@@ -79,7 +79,6 @@ fun LoginPageApp(onSuccess: () -> Unit = {}) {
     var passwordVisibility by remember { mutableStateOf(false) }
     var statusMessage by rememberSaveable { mutableStateOf("") }
     var isError by rememberSaveable { mutableStateOf(false) }
-    val context = LocalContext.current
 
     val icon = if (passwordVisibility)
         painterResource(id = R.drawable.visibility_icon)

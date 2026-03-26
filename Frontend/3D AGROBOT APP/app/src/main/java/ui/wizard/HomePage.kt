@@ -1,10 +1,5 @@
 package ui.wizard
 
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-
-package ui.wizard
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,6 +31,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -96,6 +92,18 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
             Text(
                 text = "Добре дошъл,",
                 fontSize = 18.sp,
+                color = Color(0xFF639922)
+            )
+            Text(
+                text = "$firstName $lastName",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFEAF3DE)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Вашата градина ви чака",
+                fontSize = 14.sp,
                 color = Color(0xFF639922)
             )
         }
