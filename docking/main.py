@@ -12,16 +12,13 @@ log = logging.getLogger(__name__)
 
 
 def main():
-	# 1. Login
 	api = Api()
 	if not api.login():
 		return
 
-	# 2. Camera WebSocket server (background)
 	camera = CameraServer()
 	camera.start()
 
-	# 3. Избор на градина
 	gardens = api.list_gardens()
 	if not gardens:
 		return
@@ -29,7 +26,6 @@ def main():
 	garden = api.choose_garden(gardens)
 	api.show_garden(garden)
 
-	# 4. ESP32 връзка + polling
 	with ESP32Connection() as esp:
 		resp = esp.send("PING")
 		log.info(f"PING -> {resp}")
