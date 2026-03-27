@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,24 +65,13 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import com.example.a3d_agrobot_app.R
 
-
-class HomePage : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Scaffold(modifier = Modifier.fillMaxSize()) {
-                HomePageApp()
-            }
-        }
-    }
-}
-
 @Composable
 fun HomePageApp(onLogout: () -> Unit = {}) {
     val context = LocalContext.current
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var gardenScreen by remember { mutableStateOf("list") }
+    var selectedGarden by remember { mutableStateOf<GardenData?>(null) }
 
     LaunchedEffect(Unit) {
         firstName = withContext(Dispatchers.IO) { TokenStore.getFirstName(context) ?: "" }
@@ -102,7 +94,7 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Добре дошли, $firstName",
+                    text = "Добре дошли, $firstName $lastName",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF27500A)
@@ -130,7 +122,26 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
     ) { values ->
         Box(modifier = Modifier.padding(values)) {
             when (selectedTab) {
-         //       0 -> GardenPageApp()
+                0 -> when (gardenScreen) {
+                    "list" -> GardenPageApp(
+                        onAddClick  = { gardenScreen = "create" },
+                        onEditClick = { garden ->
+                            selectedGarden = garden
+                            gardenScreen = "edit"
+                        }
+                    )
+                    "create" -> CreateGardenPageApp(
+                        onSuccess = { gardenScreen = "list" },
+                        onBack    = { gardenScreen = "list" }
+                    )
+                    "edit" -> selectedGarden?.let { garden ->
+                        EditGardenPageApp(
+                            garden    = garden,
+                            onSuccess = { gardenScreen = "list" },
+                            onBack    = { gardenScreen = "list" }
+                        )
+                    }
+                }
         //        1 -> RobotConnectPageApp()
       //          2 -> CheckHealthPageApp()
             }
@@ -147,24 +158,27 @@ fun BottomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .height(70.dp)
-            .background(Color(0xFFEAF3DE))
+            .background(Color.White)
             .padding(horizontal = 24.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
         NavIconItem(
             iconId = R.drawable.wheat_icon,
+            label = "Градини",
             isSelected = selectedTab == 0,
-            onClick = {onTabSelected(0)}
+            onClick = {onTabSelected(0)
+            }
         )
         NavIconItem(
             iconId = R.drawable.robot,
+            label = "Робот",
             isSelected = selectedTab == 1,
             onClick = {onTabSelected(1)}
         )
         NavIconItem(
             iconId = R.drawable.health_icon,
+            label = "Здраве",
             isSelected = selectedTab == 2,
             onClick = {onTabSelected(2)}
         )
@@ -172,17 +186,36 @@ fun BottomNavigationBar(
 }
 
 @Composable
-fun NavIconItem(iconId: Int, isSelected: Boolean, onClick: () -> Unit) {
+fun NavIconItem(iconId: Int, label: String, isSelected: Boolean, onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) Color(0xFF3B6D11) else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
     ) {
+        Box(
+            modifier = Modifier
+                .width(28.dp)
+                .height(2.5.dp)
+                .clip(RoundedCornerShape(bottomStart =  4.dp, bottomEnd = 4.dp))
+                .background(if (isSelected) Color(0xFF3B6D11) else Color.Transparent)
+
+        )
+        Spacer(modifier = Modifier.height(6.dp))
         Icon(
             painter = painterResource(id = iconId),
-            contentDescription = null,
-            tint = if (isSelected) Color.White else Color(0xFF639922)
+            contentDescription = "Icon",
+            tint = if (isSelected) Color(0xFF3B6D11) else Color(0xFF9db88a),
+            modifier = Modifier.size(22.dp)
         )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            fontSize = 10.sp,
+            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+            color = if (isSelected) Color(0xFF3B6D11) else Color(0xFF9db88a)
+        )
+
     }
 }

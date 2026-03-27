@@ -12,7 +12,7 @@ class SignupData {
         email: String,
         password: String
     ): String {
-        val url = URL("http://10.196.140.20:5000/auth/register")
+        val url = URL("https://3d-agrobot-production.up.railway.app/auth/register")
         val conn = url.openConnection() as HttpURLConnection
 
 
