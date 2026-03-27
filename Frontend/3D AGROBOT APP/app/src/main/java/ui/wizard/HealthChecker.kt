@@ -167,7 +167,7 @@ fun ReportCard(report: ReportData) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.health_icon),
+                    painter = painterResource(R.drawable.illness),
                     contentDescription = null,
                     tint = cardColor,
                     modifier = Modifier.size(24.dp)
@@ -203,13 +203,12 @@ fun ReportCard(report: ReportData) {
 
         if (report.recommendations.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Препоръки", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Gray)
+            Text("Съвети", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Gray)
             report.recommendations.forEach { rec ->
                 Text("• $rec", fontSize = 13.sp, color = Color(0xFF3B6D11))
             }
         }
 
-        // Дата
         report.receivedAt?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(it, fontSize = 11.sp, color = Color.LightGray)
