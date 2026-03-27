@@ -11,16 +11,16 @@ class GardenRepository {
 
     fun getGardens(token: String): List<GardenData> {
         val url = URL("$baseUrl/garden/list")
-        val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "GET"
-        conn.setRequestProperty("Authorization", "Bearer $token")
-        conn.connectTimeout = 5000
-        conn.readTimeout = 5000
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer $token")
+        connection.connectTimeout = 5000
+        connection.readTimeout = 5000
 
-        val code = conn.responseCode
-        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+        val code = connection.responseCode
+        val stream = if (code in 200..299) connection.inputStream else connection.errorStream
         val response = stream.bufferedReader().use { it.readText() }
-        conn.disconnect()
+        connection.disconnect()
 
         val list = mutableListOf<GardenData>()
 
@@ -54,51 +54,53 @@ class GardenRepository {
 
     fun createGarden(token: String, data: GardenData): Int {
         val url = URL("$baseUrl/garden/create")
-        val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "POST"
-        conn.setRequestProperty("Content-Type", "application/json")
-        conn.setRequestProperty("Authorization", "Bearer $token")
-        conn.connectTimeout = 5000
-        conn.readTimeout = 5000
-        conn.doOutput = true
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.setRequestProperty("Authorization", "Bearer $token")
+        connection.connectTimeout = 5000
+        connection.readTimeout = 5000
+        connection.doOutput = true
 
         val body = JSONObject().apply {
-            put("garden_name",   data.garden_name)
-            put("garden_width",  data.garden_width)
+            put("garden_name", data.garden_name)
+            put("garden_width", data.garden_width)
             put("garden_height", data.garden_height)
-            put("path_width",    data.path_width)
-            put("number_beds",   data.number_beds)
-            put("plant",         data.plant)
+            put("path_width", data.path_width)
+            put("number_beds", data.number_beds)
+            put("plant", data.plant)
         }.toString()
 
-        conn.outputStream.use { it.write(body.toByteArray()) }
-        val code = conn.responseCode
-        conn.disconnect()
+        connection.outputStream.use {
+            it.write(body.toByteArray())
+        }
+        val code = connection.responseCode
+        connection.disconnect()
         return code
     }
 
     fun editGarden(token: String, id: Int, data: GardenData): Int {
         val url = URL("$baseUrl/garden/edit/$id")
-        val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "PUT"
-        conn.setRequestProperty("Content-Type", "application/json")
-        conn.setRequestProperty("Authorization", "Bearer $token")
-        conn.connectTimeout = 5000
-        conn.readTimeout = 5000
-        conn.doOutput = true
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "PUT"
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.setRequestProperty("Authorization", "Bearer $token")
+        connection.connectTimeout = 5000
+        connection.readTimeout = 5000
+        connection.doOutput = true
 
         val body = JSONObject().apply {
-            put("garden_name",   data.garden_name)
-            put("garden_width",  data.garden_width)
+            put("garden_name", data.garden_name)
+            put("garden_width", data.garden_width)
             put("garden_height", data.garden_height)
-            put("path_width",    data.path_width)
-            put("number_beds",   data.number_beds)
-            put("plant",         data.plant)
+            put("path_width", data.path_width)
+            put("number_beds", data.number_beds)
+            put("plant", data.plant)
         }.toString()
 
-        conn.outputStream.use { it.write(body.toByteArray()) }
-        val code = conn.responseCode
-        conn.disconnect()
+        connection.outputStream.use { it.write(body.toByteArray()) }
+        val code = connection.responseCode
+        connection.disconnect()
         return code
     }
 }

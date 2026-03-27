@@ -54,9 +54,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun RobotScreen(
-    onStartClick:(Int) -> Unit
-) {
+fun RobotScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 

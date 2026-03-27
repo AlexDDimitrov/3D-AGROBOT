@@ -208,7 +208,7 @@ fun LoginScreen(onSuccess: () -> Unit = {}) {
                             CoroutineScope(Dispatchers.IO).launch {
 
                                 try {
-                                    val response = LoginData().register(
+                                    val response = LoginData().login(
                                         email, password
                                     )
 
@@ -229,7 +229,9 @@ fun LoginScreen(onSuccess: () -> Unit = {}) {
                                         val firstName = user.getString("first_name")
                                         val lastName = user.getString("last_name")
                                         TokenStore.saveToken(context, token, firstName, lastName)
-                                        withContext(Dispatchers.Main) { onSuccess() }
+                                        withContext(Dispatchers.Main) {
+                                            onSuccess()
+                                        }
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {

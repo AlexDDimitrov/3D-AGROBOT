@@ -5,7 +5,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class SignupData {
-
     fun register(
         first_name: String,
         last_name: String,
@@ -13,12 +12,12 @@ class SignupData {
         password: String
     ): String {
         val url = URL("https://3d-agrobot-production.up.railway.app/auth/register")
-        val conn = url.openConnection() as HttpURLConnection
+        val connection = url.openConnection() as HttpURLConnection
 
 
-        conn.requestMethod = "POST"
-        conn.setRequestProperty("Content-Type", "application/json")
-        conn.doOutput = true
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.doOutput = true
 
         val body = JSONObject().apply {
             put("first_name", first_name)
@@ -27,9 +26,9 @@ class SignupData {
             put("password", password)
         }.toString()
 
-        conn.outputStream.write(body.toByteArray())
-        val response = conn.inputStream.bufferedReader().readText()
-        conn.disconnect()
+        connection.outputStream.write(body.toByteArray())
+        val response = connection.inputStream.bufferedReader().readText()
+        connection.disconnect()
 
         return response
     }

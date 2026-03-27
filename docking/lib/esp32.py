@@ -25,15 +25,14 @@ class ESP32Connection:
 				log.warning(f"Неуспешна връзка ({e}), опит след {config.RECONNECT_DELAY}s...")
 				time.sleep(config.RECONNECT_DELAY)
 
-	def send(self, cmd: str) -> str:
+	def send(self, cmd: str):
 		try:
 			self.sock.sendall((cmd + "\n").encode("utf-8"))
-			response = self.sock.recv(1024).decode("utf-8").strip()
-			return response
+			return True
 		except (socket.timeout, OSError) as e:
 			log.error(f"Грешка при комуникация: {e}")
 			self.reconnect()
-			return ""
+			return False
 
 	def reconnect(self):
 		log.info("Преповтаряне на връзката...")
