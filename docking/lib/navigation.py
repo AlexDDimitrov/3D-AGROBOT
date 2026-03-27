@@ -53,20 +53,18 @@ def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, ap
 	log.info(f"Мисия: {len(commands)} команди за {garden['number_beds']} лехи")
 
 	for cmd in commands:
-            log.info(f"-> {cmd}")
-            
-            if cmd == "R":
-                image_path = camera.capture()
-                if image_path:
-                    analysis = analyze_image(image_path, plant)
-                    results.append({"image": image_path, "analysis": analysis})
-                    log.info(f"Анализ: {analysis}")
-                    if api:
-                        api.submit_report(analysis)
-            else:
-                resp = esp.send(cmd)
-                log.info(f"<- {resp}")
-                time.sleep(1)
+		log.info(f"-> {cmd}")
+		resp = esp.send(cmd)
+		log.info(f"<- {resp}")
+		time.sleep(1)
 
+		if cmd == "R":
+			image_path = camera.capture()
+			if image_path:
+				analysis = analyze_image(image_path, plant)
+				results.append({"image": image_path, "analysis": analysis})
+				log.info(f"Анализ: {analysis}")
 
-            return results
+				if api:
+					api.submit_report(analysis)
+	return results
