@@ -28,6 +28,24 @@ def generate_commands(garden: dict) -> list[str]:
                 
     return commands
 
+"""
+def generate_commands(garden: dict) -> list[str]:
+    bed_length = garden["garden_height"]
+    path_width = garden["path_width"]
+    num_beds = garden["number_beds"]
+
+    commands = []
+    
+    for bed in range(num_beds):
+        commands.append(f"M {bed_length}")
+        
+        commands.append("C")
+        
+        if bed < num_beds - 1:
+            commands.append(f"M {path_width}")
+                
+    return commands
+"""
 
 def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, api: Api = None) -> list[dict]:
 	commands = generate_commands(garden)
