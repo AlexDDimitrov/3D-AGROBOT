@@ -43,7 +43,7 @@ def main():
 					while not camera.connected:
 						time.sleep(1)
 
-				results = execute_mission(esp, camera, garden, api, request_id=req["id"])
+				results = execute_mission(esp, camera, garden, api)
 
 				api.update_request(req["id"], status=2)
 
