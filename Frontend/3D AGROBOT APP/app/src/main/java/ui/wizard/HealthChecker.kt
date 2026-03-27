@@ -123,7 +123,7 @@ fun HealthCheckerScreen() {
 
                 reports.isEmpty() -> {
                     Text(
-                        text = "Няма налични репорти",
+                        text = "Няма налични отчети",
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         color = Color.Gray
@@ -179,7 +179,7 @@ fun ReportCard(report: ReportData) {
                     text = report.plantType ?: "Непознато растение",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF1A3207)
+                    color = Color(0xFFE57373)
                 )
                 Text(
                     text = when {
@@ -195,7 +195,7 @@ fun ReportCard(report: ReportData) {
 
         if (report.issues.isNotEmpty()) {
             Spacer(modifier = Modifier.height(12.dp))
-            Text("Проблеми", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Gray)
+            Text("Проблеми", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Black)
             report.issues.forEach { issue ->
                 Text("• $issue", fontSize = 13.sp, color = Color(0xFF1A3207))
             }
@@ -203,7 +203,7 @@ fun ReportCard(report: ReportData) {
 
         if (report.recommendations.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Съвети", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Gray)
+            Text("Съвети", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Black)
             report.recommendations.forEach { rec ->
                 Text("• $rec", fontSize = 13.sp, color = Color(0xFF3B6D11))
             }
