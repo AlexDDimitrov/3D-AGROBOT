@@ -45,10 +45,9 @@ def generate_commands(garden: dict) -> list[str]:
                 
     return commands
 
-def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, api: Api = None, req_id: int = None) -> list[dict]:
+def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, api: Api = None) -> list[dict]:
     commands = generate_commands(garden)
     plant = garden["plant"]
-    garden_id = garden["id"]
     results = []
 
     log.info(f"Команди: {commands}")
@@ -69,7 +68,7 @@ def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, ap
                 results.append({"image": image_path, "analysis": analysis})
                 log.info(f"Анализ: {analysis}")
                 if api:
-                    api.submit_report(analysis, req_id, garden_id)
+                    api.submit_report(analysis)
             else:
                 log.warning("camera.capture() върна None!")
         else:
