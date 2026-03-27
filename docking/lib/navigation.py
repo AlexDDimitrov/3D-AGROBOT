@@ -10,19 +10,23 @@ log = logging.getLogger(__name__)
 
 
 def generate_commands(garden: dict) -> list[str]:
-	bed_length = garden["garden_height"]
-	path_width = garden["path_width"]
-	num_beds = garden["number_beds"]
+    bed_length = garden["garden_height"]
+    path_width = garden["path_width"]
+    num_beds = garden["number_beds"]
 
-	commands = []
-	for bed in range(num_beds):
-		commands.append(f"M{bed_length}")
-		if bed < num_beds - 1:
-			if bed % 2 == 0:
-				commands.extend(["R", f"M{path_width}", "R"])
-			else:
-				commands.extend(["L", f"M{path_width}", "L"])
-	return commands
+    commands = []
+    for bed in range(num_beds):
+        commands.append(f"M{bed_length}")
+        
+        commands.append("C") 
+        
+        if bed < num_beds - 1:
+            if bed % 2 == 0:
+                commands.extend(["R", f"M{path_width}", "R"])
+            else:
+                commands.extend(["L", f"M{path_width}", "L"])
+                
+    return commands
 
 
 def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, api: Api = None) -> list[dict]:
