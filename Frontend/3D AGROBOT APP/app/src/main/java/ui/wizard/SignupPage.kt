@@ -64,7 +64,7 @@ import org.json.JSONObject
 
 
 @Composable
-fun SignupPageApp(onSuccess: () -> Unit = {}) {
+fun SignupScreen(onSuccess: () -> Unit = {}) {
     var first_name by rememberSaveable { mutableStateOf(String()) }
     var last_name by rememberSaveable { mutableStateOf(String()) }
     var email by rememberSaveable { mutableStateOf(String()) }
