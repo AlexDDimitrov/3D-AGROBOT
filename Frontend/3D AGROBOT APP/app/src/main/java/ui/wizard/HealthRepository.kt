@@ -1,9 +1,9 @@
 package ui.wizard
 
+import androidx.compose.runtime.Composable
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-
 class ReportRepository {
     private val baseUrl = "https://3d-agrobot-production.up.railway.app"
 
@@ -39,16 +39,24 @@ class ReportRepository {
             )
         }
     }
-
-    fun hasNotifications(token: String): Boolean {
+    fun getNotification(token: String): String? {
         val connection = (URL("$baseUrl/report/notifications").openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             setRequestProperty("Authorization", "Bearer $token")
-            connectTimeout = 5000
-            readTimeout = 5000
         }
         val response = connection.inputStream.bufferedReader().readText()
-        connection.disconnect()
-        return JSONObject(response).getBoolean("has_notifications")
+        val json = JSONObject(response)
+
+        if (json.getBoolean("has_notifications")) {
+            val notifications = json.getJSONArray("notifications")
+            val first = notifications.getJSONObject(0)
+
+            val plantType = first.getString("plant_type")
+            val issues = first.getJSONArray("issues")
+            val issuesText = (0 until issues.length()).joinToString(", ") { issues.getString(it) }
+
+            return "$plantType: $issuesText"
+        }
+        return null
     }
 }
