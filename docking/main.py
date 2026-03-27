@@ -30,7 +30,7 @@ def main():
 		resp = esp.send("PING")
 		log.info(f"PING -> {resp}")
 
-		log.info("Polling за заявки... (Ctrl+C за спиране)")
+		log.info("Polling за заявки... ")
 		while True:
 			req = api.get_pending_request()
 
