@@ -46,6 +46,7 @@ import androidx.core.app.NotificationCompat
 import com.example.a3d_agrobot_app.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.core.graphics.toColorInt
 
 @Composable
 fun HealthCheckerScreen() {
@@ -80,9 +81,9 @@ fun HealthCheckerScreen() {
         loading = false
     }
 
-    val sickReports = reports.filter { it.health == "sick" || it.health == "ill" }
-    val allHealthy = reports.isNotEmpty() && sickReports.isEmpty()
-
+    val allHealthy = reports.isNotEmpty() && reports.none {
+        it.health == "sick" || it.health == "ill"
+    }
     val hasSickPlants = reports.any { it.health == "sick" || it.health == "ill" }
 
     Column(
@@ -107,7 +108,23 @@ fun HealthCheckerScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (hasSickPlants || hasServerNotification) {
+            if (allHealthy) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF3B6D11).copy(alpha = 0.1f))
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Всички растения са здрави",
+                        color = Color(0xFF3B6D11),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -122,25 +139,6 @@ fun HealthCheckerScreen() {
                     Text(error, color = Color(0xFFE57373))
                 }
 
-                allHealthy -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF3B6D11).copy(alpha = 0.1f))
-                            .padding(24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Всички растения са здрави",
-                            color = Color(0xFF3B6D11),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 15.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
                 reports.isEmpty() -> {
                     Text(
                         text = "Няма налични отчети",
@@ -151,14 +149,12 @@ fun HealthCheckerScreen() {
                 }
 
                 else -> {
-                    val displayReports = reports.filter { it.health != "healthy" }
-
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
-                        items(displayReports) { report ->
+                        items(reports) { report ->
                             ReportCard(report)
                         }
                     }
@@ -167,12 +163,17 @@ fun HealthCheckerScreen() {
         }
     }
 }
+
 @Composable
 fun ReportCard(report: ReportData) {
     val isSick = report.health == "sick" || report.health == "ill"
+    val isDead = report.health == "dead"
+    val isUnknown = report.health == "unknown"
     val cardColor = when {
-        !report.hasPlant -> Color.Gray
+        !report.hasPlant -> Color(0xFF9E9E9E)
+        isDead -> Color(0xFF757575)
         isSick -> Color(0xFFE57373)
+        isUnknown -> Color(0xFF4DB6AC)
         else -> Color(0xFF3B6D11)
     }
     val backgroundColor = cardColor.copy(alpha = 0.08f)
@@ -205,12 +206,14 @@ fun ReportCard(report: ReportData) {
                     text = report.plantType  ?: "Непознато растение",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFFE57373)
+                    color = Color(0xFF1A3207)
                 )
                 Text(
                     text = when {
                         !report.hasPlant -> "Няма засадено растение"
                         isSick -> "Болно"
+                        isDead -> "Мъртво"
+                        isUnknown -> "Съмнително"
                         else-> "Здраво"
                     },
                     fontSize = 13.sp,
@@ -261,7 +264,7 @@ fun showNotification(context: Context, message: String) {
         .setContentTitle("Проблем с растение!")
         .setContentText(message)
         .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-        .setColor(android.graphics.Color.parseColor("#FFB74D"))
+        .setColor("#FFB74D".toColorInt())
         .setAutoCancel(true)
 
     notificationManager.notify(1, notification.build())
