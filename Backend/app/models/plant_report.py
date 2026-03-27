@@ -51,29 +51,30 @@ class PlantReportModel:
             report["received_at"] = str(report["received_at"])
 
         return reports
-
     @staticmethod
     def get_unread_ill(user_id: int):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
+        
         cursor.execute(
             """
             SELECT * FROM plant_reports 
-            WHERE user_id = %s AND health != 'healthy' AND is_read = 'FALSE'
+            WHERE user_id = %s AND health != 'healthy' AND is_read = FALSE
             ORDER BY received_at DESC
             """,
             (user_id,)
         )
+        reports = cursor.fetchall()
 
         cursor.execute(
             """
             UPDATE plant_reports 
-            SET is_read = 'TRUE'
-            WHERE user_id = %s AND health != 'healthy' AND is_read = 'FALSE'
+            SET is_read = TRUE
+            WHERE user_id = %s AND health != 'healthy' AND is_read = FALSE
             """,
             (user_id,)
         )
-        reports = cursor.fetchall()
+        conn.commit()
         cursor.close()
         conn.close()
 
