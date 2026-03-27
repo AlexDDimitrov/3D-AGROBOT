@@ -9,7 +9,7 @@ from .api import Api
 log = logging.getLogger(__name__)
 
 
-def generate_commands(garden: dict) -> list[str]:
+"""def generate_commands(garden: dict) -> list[str]:
     bed_length = garden["garden_height"]
     path_width = garden["path_width"]
     num_beds = garden["number_beds"]
@@ -26,9 +26,8 @@ def generate_commands(garden: dict) -> list[str]:
             else:
                 commands.extend(["L", f"M{path_width}", "L"])
                 
-    return commands
+    return commands"""
 
-"""
 def generate_commands(garden: dict) -> list[str]:
     bed_length = garden["garden_height"]
     path_width = garden["path_width"]
@@ -45,7 +44,6 @@ def generate_commands(garden: dict) -> list[str]:
             commands.append(f"M {path_width}")
                 
     return commands
-"""
 
 def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, api: Api = None) -> list[dict]:
 	commands = generate_commands(garden)
