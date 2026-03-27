@@ -142,6 +142,7 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                 onTabSelected = { selectedTab = it }
             )
         }
+
     ) { values ->
         Box(modifier = Modifier.padding(values)) {
             when (selectedTab) {
@@ -168,6 +169,7 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                 1 -> RobotScreen(
                     onStartClick = { }
                 )
+                2 -> HealthCheckerScreen()
             }
         }
     }

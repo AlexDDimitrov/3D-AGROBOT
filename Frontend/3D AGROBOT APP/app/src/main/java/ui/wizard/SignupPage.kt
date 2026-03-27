@@ -61,8 +61,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-
-
 @Composable
 fun SignupScreen(onSuccess: () -> Unit = {}) {
     var first_name by rememberSaveable { mutableStateOf(String()) }
