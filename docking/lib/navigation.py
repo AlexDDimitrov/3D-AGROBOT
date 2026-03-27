@@ -50,6 +50,7 @@ def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, ap
     plant = garden["plant"]
     results = []
 
+    log.info(f"Мисия: {len(commands)} команди за {garden['number_beds']} лехи")
     for cmd in commands:
         log.info(f"-> {cmd}")
         resp = esp.send(cmd)
