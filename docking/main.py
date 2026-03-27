@@ -30,7 +30,7 @@ def main():
 		resp = esp.send("PING")
 		log.info(f"PING -> {resp}")
 
-		log.info("Polling за заявки... (Ctrl+C за спиране)")
+		log.info("Polling за заявки... ")
 		while True:
 			req = api.get_pending_request()
 
@@ -43,13 +43,13 @@ def main():
 					while not camera.connected:
 						time.sleep(1)
 
-				results = execute_mission(esp, camera, garden, api)
+				results = execute_mission(esp, camera, garden, api, req_id=req["id"])
 
 				api.update_request(req["id"], status=2)
 
 				log.info(f"Готово! {len(results)} снимки анализирани.")
 				for r in results:
-					log.info(f"  {r['image']}: {r['analysis'][:100]}...")
+					log.info(f"  {r['image']}: {r['analysis']}...")
 
 			time.sleep(config.POLL_INTERVAL)
 
