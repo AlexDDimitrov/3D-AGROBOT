@@ -81,12 +81,16 @@ class Api:
 			json={"request_id": request_id, "status": status}
 		)
 
-	def submit_report(self, report: dict):
+	def submit_report(self, report: dict, garden_request_id: int, garden_id: int):
 		try:
 			resp = requests.post(
 				f"{self.base_url}/report/submit",
 				headers=self.headers,
-				json=report
+				json={
+					"garden_request_id": garden_request_id,
+					"garden_id": garden_id,
+					"report": report
+				}
 			)
 			log.info(f"Report submit: {resp.status_code}")
 			return resp.json()
