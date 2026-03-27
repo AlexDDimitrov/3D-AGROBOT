@@ -3,14 +3,21 @@
 #define MPU_ADDR      0x68
 #define PWR_MGMT_1    0x6B
 #define ACCEL_CONFIG  0x1C
-#define ACCEL_XOUT_H  0x3B
+#define ACCEL_YOUT_H  0x3D
 
-float targetDistance = -1.0; 
-float velocityX      = 0.0;
-float distanceX      = 0.0;
-unsigned long previousTime = 0;
+float targetDistance = 0;
 
-// Hardware Pins 
+#define ALPHA 0.2
+float AcselY_Filter = 0;
+double velocityY      = 0.0;
+double distanceY      = 0.0;
+float biasY = 0.0;
+unsigned long t_now = 0;
+unsigned long t_then = 0;
+
+unsigned long moveStartTime = 0;
+
+// Hardware Pins
 #define AIN1_R 22
 #define AIN2_R 23
 #define PWMA_R 44
@@ -67,27 +74,27 @@ void stopRMotors() {
   analogWrite(PWMB_R, 0);
 }
 
-void moveForward(int speed){ 
+void moveForward(int speed) {
   rightForward(speed);
   leftForward(speed);
 }
 
-void moveBackward(int speed){
+void moveBackward(int speed) {
   rightBackward(speed);
   leftBackward(speed);
 }
 
-void turnRight(int speed){
+void turnRight(int speed) {
   leftForward(speed);
   rightBackward(speed);
 }
 
-void turnLeft(int speed){ 
-  leftBackward(speed);  
+void turnLeft(int speed) {
+  leftBackward(speed);
   rightForward(speed);
 }
 
-void stopRobot(){
+void stopRobot() {
   stopLMotors();
   stopRMotors();
 }
@@ -100,131 +107,237 @@ bool mpuInit() {
   delay(100);
   Wire.beginTransmission(MPU_ADDR);
   Wire.write(ACCEL_CONFIG);
-  Wire.write(0x10); // ±8g
+  Wire.write(0x08); // ±8g
   return (Wire.endTransmission(true) == 0);
 }
 
-float readAccelX() {
+void i2cRecover() {
+   Wire.end();
+   pinMode(20, INPUT_PULLUP); // SDA на Mega = pin 20
+   pinMode(21, OUTPUT);       // SCL на Mega = pin 21
+   for (int i = 0; i < 20; i++) {
+     digitalWrite(21, LOW);
+     delayMicroseconds(10);
+     digitalWrite(21, HIGH);
+     delayMicroseconds(10);
+   }
+   Wire.begin();
+   Wire.setClock(400000L);
+   Wire.setWireTimeout(3000, true);
+ }
+
+float readAccelY() {
   Wire.beginTransmission(MPU_ADDR);
-  Wire.write(ACCEL_XOUT_H);
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU_ADDR, 2, true);
-  if (Wire.available() < 2) return 0.0;
-  
-  int16_t raw = (Wire.read() << 8) | Wire.read();
-  float accel_cm_s2 = (raw / 4096.0) * 980.66; 
-  return accel_cm_s2;
+   Wire.write(ACCEL_YOUT_H);
+   if (Wire.endTransmission(false) != 0) {
+     i2cRecover();
+     return 0.0;
+   }
+   Wire.requestFrom(MPU_ADDR, 2, true);
+   if (Wire.available() < 2) {
+     i2cRecover();
+     return 0.0;
+   }
+   int16_t raw = (Wire.read() << 8) | Wire.read();
+   float accel_cm_s2 = ((float)raw / 8192.0) * 980.66;
+   return accel_cm_s2;
 }
 
-String parseCommand(String str) {
-    str.trim();
-    
-    if (str.length() == 0) return "";
-    
-    char cmd = str.charAt(0);
-    
-    if (cmd == 'L') {
-        return "left";
-    } else if (cmd == 'R') {
-        return "right";
-    } else if (cmd == 'M') {
-        String numPart = str.substring(1);
-        numPart.trim();
-        int value = numPart.toInt();
-        return String(value);
-    }
-    
+  /*String str = "";
+
+  if (Serial.available()) {
+    str = Serial.readStringUntil('\n');
+  } else if (Serial1.available()) {
     return "";
+  } else {
+    return "";
+  }
+
+  str.trim();
+  if (str.length() == 0) return "";
+
+  if (str.equalsIgnoreCase("L")) return "left";
+  if (str.equalsIgnoreCase("R")) return "right";
+
+  String numStr = str;
+  if (str.charAt(0) == 'M' || str.charAt(0) == 'm') {
+    numStr = str.substring(1);
+    numStr.trim();
+  }
+
+  float val = numStr.toFloat();
+  if (val > 0) return String(val, 2);
+
+  return "";*/
+
+String readIncomingCommand() {
+  String str = "";
+
+  if (Serial1.available()) {
+    str = Serial1.readStringUntil('\n');
+  } else {
+    return "";
+  }
+
+  str.trim();
+  if (str.length() == 0) return "";
+
+  if (str.equalsIgnoreCase("L")) return "left";
+  if (str.equalsIgnoreCase("R")) return "right";
+
+  String numStr = str;
+  if (str.charAt(0) == 'M' || str.charAt(0) == 'm') {
+    numStr = str.substring(1);
+    numStr.trim();
+  }
+
+  float val = numStr.toFloat();
+  if (val > 0) return String(val, 2);
+
+  return "";
+}
+
+void calibrate() {
+  Serial.print("Calibrating");
+  biasY = 0.0;
+  for (int i = 0; i < 1000; i++) {
+    biasY += readAccelY();
+    if (i % 200 == 0) Serial.print(".");
+  }
+  biasY /= 1000.0;
+  Serial.print(" bias=");
+  Serial.print(biasY, 2);
+  Serial.println(" OK");
 }
 
 void setup() {
   Serial.begin(115200);
-  Serial1.begin(115200);  // Communication with ESP32
+  Serial1.begin(115200);
   Wire.begin();
-  
-  if (!mpuInit()) Serial.println("MPU6050 Fail!");
+  Wire.setClock(400000L);
+  Wire.setWireTimeout(3000, true);
 
-  pinMode(AIN1_R , OUTPUT);
-  pinMode(AIN2_R , OUTPUT);
-  pinMode(PWMA_R , OUTPUT);
-  pinMode(BIN1_R , OUTPUT);
-  pinMode(BIN2_R , OUTPUT);
-  pinMode(PWMB_R , OUTPUT);
+  if (!mpuInit()) Serial.println("MPU6050 init FAILED!");
+  else            Serial.println("MPU6050 OK");
 
-  pinMode(AIN1_L , OUTPUT);
-  pinMode(AIN2_L , OUTPUT);
-  pinMode(PWMA_L , OUTPUT);
-  pinMode(BIN1_L , OUTPUT);
-  pinMode(BIN2_L , OUTPUT);
-  pinMode(PWMB_L , OUTPUT);
+  pinMode(AIN1_R, OUTPUT); pinMode(AIN2_R, OUTPUT); pinMode(PWMA_R, OUTPUT);
+  pinMode(BIN1_R, OUTPUT); pinMode(BIN2_R, OUTPUT); pinMode(PWMB_R, OUTPUT);
+  pinMode(AIN1_L, OUTPUT); pinMode(AIN2_L, OUTPUT); pinMode(PWMA_L, OUTPUT);
+  pinMode(BIN1_L, OUTPUT); pinMode(BIN2_L, OUTPUT); pinMode(PWMB_L, OUTPUT);
 
   stopRobot();
-  previousTime = micros();
+
+  calibrate();
+
+  t_then = micros();
 }
 
-void loop() {
-  unsigned long currentTime = micros();
-  float dt = (currentTime - previousTime) / 1000000.0;
-  previousTime = currentTime;
+double calkdist(){
+  Serial.println("reading accelerometer");
+  float accelY = readAccelY() - biasY;
+  Serial.println("accelY");
+  Serial.println(accelY);
+  AcselY_Filter = AcselY_Filter + ALPHA * (accelY - AcselY_Filter);
 
-  float accelX = readAccelX();
+  if(AcselY_Filter<0.0) {
+    AcselY_Filter=0.0;
+  }
+
+  t_now = micros();
+  float dt = (float)(t_now - t_then ) / (float)1000000.0;
+  Serial.println("dt");
+  Serial.println(dt, 4);
+
+  t_then = t_now;
   
-  if (abs(accelX) < 15.0) accelX = 0;
+  Serial.println("accel");
+  Serial.println(AcselY_Filter);
+  velocityY += (double)AcselY_Filter * dt;
+  distanceY += velocityY * dt;
+  Serial.println("velocityY");
+  Serial.println(velocityY);
+  Serial.println("distanceY");
+  Serial.println(distanceY);
+  return distanceY;
+}
 
-  if (targetDistance > 0) {
-    velocityX += accelX * dt;
-    distanceX += velocityX * dt;
-  } else {
-    velocityX = 0;
-    distanceX = 0;
-  }
+void zero_var(){
+  AcselY_Filter = 0;
+  velocityY = 0.0;
+  distanceY= 0.0;
+  t_now = 0;
+  t_then = 0;
+}
 
-  if (Serial1.available()) {
-    String str = Serial1.readStringUntil('\n');
-    str.trim();
 
-    String result = parseCommand(str);
+static unsigned long lastPrint = 0;
 
-    if (result == "left") {
-      turnLeft(150);
-      delay(2000);
-      stopRobot();
-    } else if (result == "right") {
-      turnRight(150);
-      delay(2000);
-      stopRobot();
-    } else if (result.length() > 0) {
-      float val = result.toFloat(); 
-      if (val > 0) {
-        targetDistance = val;
-        distanceX = 0;
-        velocityX = 0;
-        Serial.print("Target Set (cm): ");
-        Serial.println(val);
-      }
-    }
-  }
 
-  if (targetDistance > 0) {
-    if (distanceX < targetDistance) {
+void loop() {
+  Serial.println("Reading command");
+  String cmd = readIncomingCommand();
+  Serial.println("Did it!");
+
+  delay(10);
+
+  if (cmd == "left") {
+    Serial.println("Turning LEFT...");
+    stopRobot();
+    turnLeft(150);
+    delay(1100);
+    stopRobot();
+    Serial.println("Turn done.");
+
+  } else if (cmd == "right") {
+    Serial.println("Turning RIGHT...");
+    stopRobot();
+    turnRight(150);
+    delay(1100);
+    stopRobot();
+    Serial.println("Turn done.");
+
+  } else if (cmd.length() > 0) {
+    float val = cmd.toFloat();
+    if (val > 0) {
+      targetDistance = val;
+      Serial.print("Target set: ");
+      Serial.print(val);
+      Serial.println(" cm — moving forward...");
+      calibrate();
+      zero_var();
       moveForward(160);
-    } else {
-      stopRobot();
-      
-      // Send "R" to ESP32/Raspberry Pi
-      Serial1.println("R"); 
-      Serial.println("Destination Reached!");
-      
-      targetDistance = -1.0;
-      velocityX = 0;
-      distanceX = 0;
+      t_then = micros();
+      lastPrint=millis();
     }
   }
 
-  static unsigned long lastPrint = 0;
-  if (millis() - lastPrint > 500 && targetDistance > 0) {
-    Serial.print("Dist (cm): "); 
-    Serial.println(distanceX);
+  if (targetDistance > 0) {
+    distanceY = calkdist();
+    if (distanceY >= targetDistance) {
+      stopRobot();
+
+      Serial.print(">> Destination reached! Total: ");
+      Serial.print(distanceY, 1);
+      Serial.println(" cm");
+
+      Serial1.println("R");
+      calibrate();
+      zero_var();
+      targetDistance = -1.0;
+    }
+  }
+
+  if (targetDistance && millis() - lastPrint > 500) {
+    Serial.print("   Progress: ");
+    Serial.print(distanceY, 1);
+    Serial.print(" / ");
+    Serial.print(targetDistance, 1);
+    Serial.print(" cm  (");
+    Serial.print((distanceY / targetDistance) * 100.0, 0);
+    Serial.println("%)");
+    Serial.println(cmd.length());
+    Serial.println(cmd.toFloat());
     lastPrint = millis();
   }
+
 }
