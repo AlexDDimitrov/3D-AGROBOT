@@ -75,8 +75,11 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
     var selectedGarden by remember { mutableStateOf<GardenData?>(null) }
 
     LaunchedEffect(Unit) {
-        firstName = withContext(Dispatchers.IO) { TokenStore.getFirstName(context) ?: "" }
-        lastName = withContext(Dispatchers.IO) { TokenStore.getLastName(context) ?: "" }
+        firstName = withContext(Dispatchers.IO) {
+            TokenStore.getFirstName(context) ?: "" }
+        lastName = withContext(Dispatchers.IO) {
+            TokenStore.getLastName(context) ?: ""
+        }
     }
 
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -124,7 +127,9 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                     IconButton(onClick = {
                         CoroutineScope(Dispatchers.IO).launch {
                             TokenStore.clearToken(context)
-                            withContext(Dispatchers.Main) { onLogout() }
+                            withContext(Dispatchers.Main) {
+                                onLogout()
+                            }
                         }
                     }) {
                         Icon(
@@ -166,9 +171,7 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                         )
                     }
                 }
-                1 -> RobotScreen(
-                    onStartClick = { }
-                )
+                1 -> RobotScreen()
                 2 -> HealthCheckerScreen()
             }
         }

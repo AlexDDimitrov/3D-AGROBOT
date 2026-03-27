@@ -85,7 +85,9 @@ fun GardenScreen(
         val token = withContext(Dispatchers.IO) {
                 TokenStore.getToken(context)
         } ?: return@LaunchedEffect
-        gardens = withContext(Dispatchers.IO) { GardenRepository().getGardens(token) }
+        gardens = withContext(Dispatchers.IO) {
+            GardenRepository().getGardens(token)
+        }
         loading = false
     }
 
