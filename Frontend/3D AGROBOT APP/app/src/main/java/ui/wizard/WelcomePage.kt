@@ -50,7 +50,6 @@ fun WelcomeScreen(
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,7 +82,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = "За по-здрава реколта с по-малко усилия",
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center,
                 color = Color(0xFFEAF3DE)
@@ -101,9 +100,7 @@ fun WelcomeScreen(
                 ) {
                     Text("Влезте в профила си", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 OutlinedButton(
                     onClick = onSignupClick,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFEAF3DE)),

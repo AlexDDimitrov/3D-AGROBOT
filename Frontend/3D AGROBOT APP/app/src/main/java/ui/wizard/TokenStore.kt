@@ -12,13 +12,13 @@ val Context.dataStore by preferencesDataStore(name = "auth")
 object TokenStore {
     private val TOKEN_KEY = stringPreferencesKey("token")
     private val FIRST_NAME_KEY = stringPreferencesKey("first_name")
-    private val LAST_NAME_KEY  = stringPreferencesKey("last_name")
+    private val LAST_NAME_KEY = stringPreferencesKey("last_name")
 
     suspend fun saveToken(context: Context, token: String, firstName: String, lastName: String) {
         context.dataStore.edit { prefs ->
             prefs[TOKEN_KEY] = token
             prefs[FIRST_NAME_KEY] = firstName
-            prefs[LAST_NAME_KEY]  = lastName
+            prefs[LAST_NAME_KEY] = lastName
         }
     }
     suspend fun getToken(context: Context): String? {

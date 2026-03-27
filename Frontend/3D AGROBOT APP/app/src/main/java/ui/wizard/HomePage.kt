@@ -147,7 +147,7 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
             when (selectedTab) {
                 0 -> when (gardenScreen) {
                     "list" -> GardenScreen(
-                        onAddClick  = { gardenScreen = "create" },
+                        onAddClick = { gardenScreen = "create" },
                         onEditClick = { garden ->
                             selectedGarden = garden
                             gardenScreen = "edit"
@@ -155,13 +155,13 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                     )
                     "create" -> CreateGardenScreen(
                         onSuccess = { gardenScreen = "list" },
-                        onBack    = { gardenScreen = "list" }
+                        onBack = { gardenScreen = "list" }
                     )
                     "edit" -> selectedGarden?.let { garden ->
                         EditGardenScreen(
-                            garden    = garden,
+                            garden = garden,
                             onSuccess = { gardenScreen = "list" },
-                            onBack    = { gardenScreen = "list" }
+                            onBack = { gardenScreen = "list" }
                         )
                     }
                 }
@@ -181,7 +181,7 @@ fun BottomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(vertical = 12.dp),
+            .padding(horizontal = 10.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -207,6 +207,7 @@ fun BottomNavigationBar(
                     Icon(
                         painter = painterResource(item.first),
                         contentDescription = null,
+                        modifier = Modifier.size(50.dp),
                         tint = if (isSelected) Color.White else Color(0xFF5E8A37)
                     )
                 }

@@ -82,8 +82,9 @@ fun GardenScreen(
     val totalBeds = gardens.sumOf { it.number_beds }
 
     LaunchedEffect(Unit) {
-        val token =
-            withContext(Dispatchers.IO) { TokenStore.getToken(context) } ?: return@LaunchedEffect
+        val token = withContext(Dispatchers.IO) {
+                TokenStore.getToken(context)
+        } ?: return@LaunchedEffect
         gardens = withContext(Dispatchers.IO) { GardenRepository().getGardens(token) }
         loading = false
     }

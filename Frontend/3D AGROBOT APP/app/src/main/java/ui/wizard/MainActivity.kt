@@ -94,44 +94,43 @@ fun AppNavigation() {
         } else startDestination = "Welcome"
     }
 
-
-        NavHost(
-            navController = navController,
-            startDestination = startDestination
-        ) {
-            composable("Welcome") {
-                WelcomeScreen(
-                    onLoginClick = { navController.navigate("Login") },
-                    onSignupClick = { navController.navigate("Signup")}
-                )
-            }
-            composable("Login") {
-                LoginScreen (
-                    onSuccess = {
-                        navController.navigate("Home") {
-                            popUpTo("Welcome") { inclusive = true }
-                        }
-                    }
-                )
-
-            }
-            composable("Signup") {
-                SignupScreen(
-                    onSuccess = {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        composable("Welcome") {
+            WelcomeScreen(
+                onLoginClick = { navController.navigate("Login") },
+                onSignupClick = { navController.navigate("Signup")}
+            )
+        }
+        composable("Login") {
+            LoginScreen (
+                onSuccess = {
                     navController.navigate("Home") {
                         popUpTo("Welcome") { inclusive = true }
                     }
                 }
-                )
-            }
-            composable("Home") {
-                HomeScreen(
-                    onLogout = {
-                    navController.navigate("Welcome") {
-                        popUpTo("Welcome") { inclusive = true }
-                    }
+            )
+
+        }
+        composable("Signup") {
+            SignupScreen(
+                onSuccess = {
+                navController.navigate("Home") {
+                    popUpTo("Welcome") { inclusive = true }
                 }
-                )
             }
+            )
+        }
+        composable("Home") {
+            HomeScreen(
+                onLogout = {
+                navController.navigate("Welcome") {
+                    popUpTo("Welcome") { inclusive = true }
+                }
+            }
+            )
         }
     }
+}
