@@ -58,7 +58,7 @@ def execute_mission(esp: ESP32Connection, camera: CameraServer, garden: dict, ap
 		log.info(f"<- {resp}")
 		time.sleep(1)
 
-		if cmd == "CAPTURE":
+		if cmd == "R":
 			image_path = camera.capture()
 			if image_path:
 				analysis = analyze_image(image_path, plant)
