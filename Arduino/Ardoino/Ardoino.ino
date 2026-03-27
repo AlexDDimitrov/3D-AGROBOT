@@ -143,7 +143,8 @@ float readAccelY() {
    return accel_cm_s2;
 }
 
-  /*String str = "";
+  /*This is for debugging from Arduinos terminal
+  String str = "";
 
   if (Serial.available()) {
     str = Serial.readStringUntil('\n');
@@ -233,10 +234,7 @@ void setup() {
 }
 
 double calkdist(){
-  Serial.println("reading accelerometer");
   float accelY = readAccelY() - biasY;
-  Serial.println("accelY");
-  Serial.println(accelY);
   AcselY_Filter = AcselY_Filter + ALPHA * (accelY - AcselY_Filter);
 
   if(AcselY_Filter<0.0) {
@@ -245,19 +243,11 @@ double calkdist(){
 
   t_now = micros();
   float dt = (float)(t_now - t_then ) / (float)1000000.0;
-  Serial.println("dt");
-  Serial.println(dt, 4);
 
   t_then = t_now;
-  
-  Serial.println("accel");
-  Serial.println(AcselY_Filter);
+
   velocityY += (double)AcselY_Filter * dt;
   distanceY += velocityY * dt;
-  Serial.println("velocityY");
-  Serial.println(velocityY);
-  Serial.println("distanceY");
-  Serial.println(distanceY);
   return distanceY;
 }
 
@@ -274,9 +264,7 @@ static unsigned long lastPrint = 0;
 
 
 void loop() {
-  Serial.println("Reading command");
   String cmd = readIncomingCommand();
-  Serial.println("Did it!");
 
   delay(10);
 
@@ -326,18 +314,4 @@ void loop() {
       targetDistance = -1.0;
     }
   }
-
-  if (targetDistance && millis() - lastPrint > 500) {
-    Serial.print("   Progress: ");
-    Serial.print(distanceY, 1);
-    Serial.print(" / ");
-    Serial.print(targetDistance, 1);
-    Serial.print(" cm  (");
-    Serial.print((distanceY / targetDistance) * 100.0, 0);
-    Serial.println("%)");
-    Serial.println(cmd.length());
-    Serial.println(cmd.toFloat());
-    lastPrint = millis();
-  }
-
 }
