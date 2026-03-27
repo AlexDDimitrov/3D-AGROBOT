@@ -1,9 +1,14 @@
 package ui.wizard
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationCompat
 import com.example.a3d_agrobot_app.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,7 +53,7 @@ fun HealthCheckerScreen() {
     var reports by remember { mutableStateOf<List<ReportData>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf("") }
-
+    var hasServerNotification by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val token = withContext(Dispatchers.IO) {
@@ -59,7 +65,15 @@ fun HealthCheckerScreen() {
             return@LaunchedEffect
         }
         try {
-            reports = withContext(Dispatchers.IO) { ReportRepository().getReports(token) }
+            withContext(Dispatchers.IO) {
+                val repo = ReportRepository()
+                reports = repo.getReports(token)
+
+                val notifText = repo.getNotification(token)
+                if (notifText != null) {
+                    showNotification(context, notifText)
+                }
+            }
         } catch (e: Exception) {
             error = "Грешка: ${e.message}"
         }
@@ -69,11 +83,13 @@ fun HealthCheckerScreen() {
     val sickReports = reports.filter { it.health == "sick" || it.health == "ill" }
     val allHealthy = reports.isNotEmpty() && sickReports.isEmpty()
 
+    val hasSickPlants = reports.any { it.health == "sick" || it.health == "ill" }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF1F5E9)),
+            .background(Color(0xFFF1F5E9))
+            .statusBarsPadding(),
     ) {
         Column(
             modifier = Modifier
@@ -90,6 +106,10 @@ fun HealthCheckerScreen() {
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            if (hasSickPlants || hasServerNotification) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             when {
                 loading -> {
@@ -131,8 +151,14 @@ fun HealthCheckerScreen() {
                 }
 
                 else -> {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(reports) { report ->
+                    val displayReports = reports.filter { it.health != "healthy" }
+
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
+                        items(displayReports) { report ->
                             ReportCard(report)
                         }
                     }
@@ -176,7 +202,7 @@ fun ReportCard(report: ReportData) {
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = report.plantType ?: "Непознато растение",
+                    text = report.plantType  ?: "Непознато растение",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color(0xFFE57373)
@@ -197,7 +223,7 @@ fun ReportCard(report: ReportData) {
             Spacer(modifier = Modifier.height(12.dp))
             Text("Проблеми", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Black)
             report.issues.forEach { issue ->
-                Text("• $issue", fontSize = 13.sp, color = Color(0xFF1A3207))
+                Text("• $issue", fontSize = 13.sp, color = Color(0xFFFFB74D))
             }
         }
 
@@ -205,7 +231,7 @@ fun ReportCard(report: ReportData) {
             Spacer(modifier = Modifier.height(8.dp))
             Text("Съвети", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = Color.Black)
             report.recommendations.forEach { rec ->
-                Text("• $rec", fontSize = 13.sp, color = Color(0xFF3B6D11))
+                Text("• $rec", fontSize = 13.sp, color = Color(0xFFE57373))
             }
         }
 
@@ -217,4 +243,26 @@ fun ReportCard(report: ReportData) {
 }
 
 
+fun showNotification(context: Context, message: String) {
+    val channelId = "plant_health_alerts"
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            channelId,
+            "Здраве на растенията",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    val notification = NotificationCompat.Builder(context, channelId)
+        .setSmallIcon(R.drawable.illness)
+        .setContentTitle("Проблем с растение!")
+        .setContentText(message)
+        .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+        .setColor(android.graphics.Color.parseColor("#FFB74D"))
+        .setAutoCancel(true)
+
+    notificationManager.notify(1, notification.build())
+}
