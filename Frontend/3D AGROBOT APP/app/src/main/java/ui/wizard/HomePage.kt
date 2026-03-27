@@ -165,8 +165,9 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                         )
                     }
                 }
-        //        1 -> RobotConnectScreen()
-      //          2 -> CheckHealthScreen()
+                1 -> RobotScreen(
+                    onStartClick = { }
+                )
             }
         }
     }

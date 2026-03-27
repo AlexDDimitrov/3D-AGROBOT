@@ -58,21 +58,82 @@ fun RobotScreen(
     onStartClick:(Int) -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var gardens by remember { mutableStateOf<List<GardenData>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
-
+    var robotStatus by remember { mutableStateOf<Int?>(null) }
+    var statusMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var token by remember { mutableStateOf<String?>(null) }
     val totalBeds = gardens.sumOf { it.number_beds }
 
 
+    fun connectRobot(gardenId: Int) {
+        isLoading = true
+        statusMessage = ""
+        scope.launch(Dispatchers.IO) {
+            try {
+                val result = StartRobotRequest().startRobot(token!!, gardenId)
+                withContext(Dispatchers.Main) {
+                    statusMessage = when (result) {
+                        0    -> "Заявката е изпратена!"
+                        301  -> "Вече има активна заявка"
+                        202  -> "Моля изберете градина"
+                        else -> "Неизвестна грешка: $result"
+                    }
+                    isLoading = false
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    statusMessage = "Грешка: ${e.message}"
+                    isLoading = false
+                }
+            }
+        }
+    }
+
+
     LaunchedEffect(Unit) {
-        val token = withContext(Dispatchers.IO) {
+        token = withContext(Dispatchers.IO) {
             TokenStore.getToken(context)
         } ?: return@LaunchedEffect
         gardens = withContext(Dispatchers.IO) {
-            GardenRepository().getGardens(token)
+            GardenRepository().getGardens(token!!)
         }
         loading = false
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            val currentToken = TokenStore.getToken(context)
+            if (currentToken != null) {
+                val status = withContext(Dispatchers.IO) {
+                    try {
+                        StartRobotRequest().getStatus(currentToken)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                robotStatus = status
+            }
+            kotlinx.coroutines.delay(5000)
+        }
+    }
+
+    val (statusText, statusColor) = when {
+        statusMessage.isNotEmpty() -> {
+            val color = if (statusMessage.startsWith("Грешка") || statusMessage.startsWith("Вече"))
+                Color(0xFFE57373) else Color(0xFF3B6D11)
+            statusMessage to color
+        }
+        else -> when (robotStatus) {
+            0 -> "Осъществяване на връзка..."  to Color(0xFF888800)
+            1 -> "Роботът извършва работа" to Color(0xFF3B6D11)
+            2 -> "Роботът приключи с работата си" to Color(0xFF1D6B2F)
+            null -> "Няма активна заявка" to Color.Gray
+            else -> "Статус: $robotStatus" to Color.Gray
+        }
     }
 
     Column(
@@ -102,6 +163,24 @@ fun RobotScreen(
                 StatCard("Градини", gardens.size.toString(), Modifier.weight(1f))
                 StatCard("Активни лехи", totalBeds.toString(), Modifier.weight(1f))
             }
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(statusColor.copy(alpha = 0.1f))
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = statusText,
+                    color = statusColor,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
             if (loading) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -123,7 +202,7 @@ fun RobotScreen(
                         ListItem(
                             displayIndex = index + 1,
                             garden = garden,
-                            onStartClick = { onStartClick(index + 1) }
+                            onStartClick = { connectRobot(garden.id) }
                         )
                     }
                 }
@@ -139,7 +218,7 @@ fun ListItem(displayIndex: Int, garden: GardenData, onStartClick: (Int) -> Unit)
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .clickable { onStartClick(displayIndex) }
+            .clickable { onStartClick(garden.id) }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -171,7 +250,7 @@ fun ListItem(displayIndex: Int, garden: GardenData, onStartClick: (Int) -> Unit)
             )
         }
 
-        IconButton(onClick = onStartClick(displayIndex)) {
+        IconButton(onClick = { onStartClick(garden.id) }) {
             Icon(
                 painter = painterResource(id = R.drawable.start_icon),
                 contentDescription = "Edit",
@@ -180,10 +259,4 @@ fun ListItem(displayIndex: Int, garden: GardenData, onStartClick: (Int) -> Unit)
         }
     }
 }
-
-@Composable
-fun onStartClick(displayIndex: Int) {
-
-}
-
 
