@@ -100,13 +100,13 @@ fun AppNavigation() {
             startDestination = startDestination
         ) {
             composable("Welcome") {
-                WelcomePageApp(
+                WelcomeScreen(
                     onLoginClick = { navController.navigate("Login") },
                     onSignupClick = { navController.navigate("Signup")}
                 )
             }
             composable("Login") {
-                LoginPageApp (
+                LoginScreen (
                     onSuccess = {
                         navController.navigate("Home") {
                             popUpTo("Welcome") { inclusive = true }
@@ -116,7 +116,7 @@ fun AppNavigation() {
 
             }
             composable("Signup") {
-                SignupPageApp(
+                SignupScreen(
                     onSuccess = {
                     navController.navigate("Home") {
                         popUpTo("Welcome") { inclusive = true }
@@ -125,7 +125,7 @@ fun AppNavigation() {
                 )
             }
             composable("Home") {
-                HomePageApp(
+                HomeScreen(
                     onLogout = {
                     navController.navigate("Welcome") {
                         popUpTo("Welcome") { inclusive = true }

@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,7 +67,7 @@ import org.json.JSONObject
 import com.example.a3d_agrobot_app.R
 
 @Composable
-fun HomePageApp(onLogout: () -> Unit = {}) {
+fun HomeScreen(onLogout: () -> Unit = {}) {
     val context = LocalContext.current
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -85,31 +86,53 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
             .fillMaxSize()
             .background(Color(0xFFF4FAE8)),
         topBar = {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 15.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Добре дошли, $firstName $lastName",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF27500A)
-                )
-                IconButton(onClick = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        TokenStore.clearToken(context)
-                        withContext(Dispatchers.Main) { onLogout() }
-                    }
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.logout),
-                        contentDescription = "Logout",
-                        tint = Color(0xFF27500A)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(0xFF27500A),
+                                Color(0xFF3B6D11),
+                                Color(0xFF639922)
+                            )
+                        )
                     )
+                    .statusBarsPadding()
+                    .padding(top = 16.dp, bottom = 24.dp, start = 24.dp, end = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Добре дошли,",
+                            fontSize = 13.sp,
+                            color = Color(0xFFEAF3DE).copy(alpha = 0.75f)
+                        )
+                        Text(
+                            text = "$firstName $lastName",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFFEAF3DE),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    IconButton(onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            TokenStore.clearToken(context)
+                            withContext(Dispatchers.Main) { onLogout() }
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.logout),
+                            contentDescription = "Logout",
+                            tint = Color(0xFFEAF3DE)
+                        )
+                    }
                 }
             }
         },
@@ -123,27 +146,27 @@ fun HomePageApp(onLogout: () -> Unit = {}) {
         Box(modifier = Modifier.padding(values)) {
             when (selectedTab) {
                 0 -> when (gardenScreen) {
-                    "list" -> GardenPageApp(
+                    "list" -> GardenScreen(
                         onAddClick  = { gardenScreen = "create" },
                         onEditClick = { garden ->
                             selectedGarden = garden
                             gardenScreen = "edit"
                         }
                     )
-                    "create" -> CreateGardenPageApp(
+                    "create" -> CreateGardenScreen(
                         onSuccess = { gardenScreen = "list" },
                         onBack    = { gardenScreen = "list" }
                     )
                     "edit" -> selectedGarden?.let { garden ->
-                        EditGardenPageApp(
+                        EditGardenScreen(
                             garden    = garden,
                             onSuccess = { gardenScreen = "list" },
                             onBack    = { gardenScreen = "list" }
                         )
                     }
                 }
-        //        1 -> RobotConnectPageApp()
-      //          2 -> CheckHealthPageApp()
+        //        1 -> RobotConnectScreen()
+      //          2 -> CheckHealthScreen()
             }
         }
     }
@@ -158,64 +181,38 @@ fun BottomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .background(Color.White)
-            .padding(horizontal = 24.dp),
+            .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NavIconItem(
-            iconId = R.drawable.wheat_icon,
-            label = "Градини",
-            isSelected = selectedTab == 0,
-            onClick = {onTabSelected(0)
+        val navItems = listOf(
+            R.drawable.wheat_icon to "Градини",
+            R.drawable.robot to "Робот",
+            R.drawable.health_icon to "Здраве"
+        )
+
+        navItems.forEachIndexed { index, item ->
+            val isSelected = selectedTab == index
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { onTabSelected(index) }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(45.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) Color(0xFF436B1F) else Color.Transparent),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(item.first),
+                        contentDescription = null,
+                        tint = if (isSelected) Color.White else Color(0xFF5E8A37)
+                    )
+                }
             }
-        )
-        NavIconItem(
-            iconId = R.drawable.robot,
-            label = "Робот",
-            isSelected = selectedTab == 1,
-            onClick = {onTabSelected(1)}
-        )
-        NavIconItem(
-            iconId = R.drawable.health_icon,
-            label = "Здраве",
-            isSelected = selectedTab == 2,
-            onClick = {onTabSelected(2)}
-        )
+        }
     }
 }
 
-@Composable
-fun NavIconItem(iconId: Int, label: String, isSelected: Boolean, onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(28.dp)
-                .height(2.5.dp)
-                .clip(RoundedCornerShape(bottomStart =  4.dp, bottomEnd = 4.dp))
-                .background(if (isSelected) Color(0xFF3B6D11) else Color.Transparent)
 
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Icon(
-            painter = painterResource(id = iconId),
-            contentDescription = "Icon",
-            tint = if (isSelected) Color(0xFF3B6D11) else Color(0xFF9db88a),
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            fontSize = 10.sp,
-            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-            color = if (isSelected) Color(0xFF3B6D11) else Color(0xFF9db88a)
-        )
-
-    }
-}

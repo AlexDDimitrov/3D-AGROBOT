@@ -37,23 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a3d_agrobot_app.R
 
-class WelcomePage : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Scaffold(modifier = Modifier.fillMaxSize()) {
-                WelcomePageApp(
-                    onLoginClick = { },
-                    onSignupClick = { }
-                )
-            }
-        }
-    }
-}
 
 @Composable
-fun WelcomePageApp(
+fun WelcomeScreen(
     onLoginClick: () -> Unit,
     onSignupClick: () -> Unit
 ) {

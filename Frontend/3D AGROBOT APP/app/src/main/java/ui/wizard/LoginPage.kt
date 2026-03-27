@@ -59,7 +59,7 @@ import org.json.JSONObject
 import com.example.a3d_agrobot_app.R
 
 @Composable
-fun LoginPageApp(onSuccess: () -> Unit = {}) {
+fun LoginScreen(onSuccess: () -> Unit = {}) {
     var email by remember { mutableStateOf(String()) }
     var isValid by remember { mutableStateOf(true) }
     var password by remember { mutableStateOf(String()) }
